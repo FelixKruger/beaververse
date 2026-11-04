@@ -2,6 +2,8 @@
 
 A small, playable woodland gathering place for builders. Walk as a beaver, meet around the fire, climb to a canopy workshop, wave, chat and opt into voice.
 
+**[Open the public solo preview](https://felixkruger.github.io/beaververse/)** · [Public repository](https://github.com/FelixKruger/beaververse) · [Verification and limitations](docs/VERIFICATION.md)
+
 **Early prototype.** The tree-lodge direction is established; the current licensed animal is a temporary stand-in while a custom hero avatar is prepared. This is an independent experiment inspired by the AI BEAVERS builder community, with no official affiliation or endorsement.
 
 ## Run locally

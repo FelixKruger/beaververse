@@ -70,7 +70,7 @@ export class Clearing {
     if (file.startsWith('forest/')) for (const render of e.findComponents('render') as pc.RenderComponent[]) for (const mesh of render.meshInstances) {
       const original = mesh.material; if (!original) continue;
       let material = this.forestMaterials.get(original);
-      if (!material) { material = (original as pc.StandardMaterial).clone(); material.diffuse.set(.66, .76, .72); material.gloss = .08; material.update(); this.forestMaterials.set(original, material); }
+      if (!material) { material = (original as pc.StandardMaterial).clone(); material.diffuse.set(.66, .76, .72); material.gloss = material.glossInvert ? .9 : .1; material.update(); this.forestMaterials.set(original, material); }
       mesh.material = material;
     }
     e.setLocalPosition(x, y, z); e.setLocalScale(scale, scale, scale); e.setLocalEulerAngles(0, yaw, 0); parent.addChild(e); return e;

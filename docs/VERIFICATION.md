@@ -20,6 +20,8 @@ Final run snapshots: **60 fps / 71 draw calls** in the desktop context, **54 fps
 Whole production directory: **2,463,394 bytes** raw, **710,896 bytes** independently gzipped estimate across 29 files. This is a local estimate, not measured cold network load time. Vite warns that the main engine/application bundle is large (about 2.02 MB minified / 519 kB gzip); it remains within the initial download budget. No blanket performance claim.
 
 ## Publication boundaries
+Public repository: [FelixKruger/beaververse](https://github.com/FelixKruger/beaververse), verified readable without authentication with `private: false`. [Live preview](https://felixkruger.github.io/beaververse/) rendered in fresh desktop and mobile-emulated contexts. All **24 asset responses** passed status/body checks, with zero console errors. The served JavaScript SHA-256 matched the local production build. Solo movement worked; voice remained unavailable without a room connection and did not capture.
+
 GitHub Pages is a static **solo preview**. It does not run the Node room server. Internet multiplayer needs a separately deployed TLS service and exact allowed origins. STUN is configured; TURN is not. The guest-room server is a prototype, not a production moderation/account system.
 
 Future personal-agent messages/world commands are documentation only. Face video remains future scope. The current licensed beaver is a temporary unrigged stand-in; bespoke avatar/animation and richer art are unfinished. Generated references are local and are not proof of runtime quality.
