@@ -1,0 +1,14 @@
+node_modules/
+dist/
+research/
+.playwright-mcp/
+ai-beavers-home.png
+artifacts/
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+.local/
+.local-*/
+design/reference-images/

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#122825" />
+  <meta name="description" content="A little woodland world for people who like building things together. An independent playable social-world prototype." />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <title>Beaververse · The clearing</title>
+</head>
+<body>
+  <canvas id="world" aria-label="The Beaververse woodland clearing" tabindex="0"></canvas>
+  <div id="labels" aria-hidden="true"></div>
+  <header>
+    <a class="brand" href="./" aria-label="Beaververse home"><span class="brand-mark">b<span>v</span></span><span>beaververse<small>THE CLEARING</small></span></a>
+    <div class="header-right"><span id="connection" class="status">Preparing the clearing</span><button id="help-button" class="quiet" aria-label="Open controls and credits">?</button></div>
+  </header>
+  <main id="entry" data-screen-label="01 Enter the clearing">
+    <div class="entry-content">
+      <div class="eyebrow"><i></i> A PLACE TO MAKE THINGS TOGETHER</div>
+      <h1>Meet at<br>the lodge.</h1>
+      <p>A small world for curious minds.<br>Find your people. Make yourself at home.</p>
+      <form id="entry-form">
+        <label for="name">What should we call you?</label>
+        <input id="name" name="name" maxlength="24" placeholder="Your beaver name" required autocomplete="nickname" />
+        <fieldset><legend>Your trail color</legend><div class="swatches">
+          <label class="swatch moss"><input type="radio" name="color" value="moss" checked/><span aria-label="Moss"></span></label>
+          <label class="swatch amber"><input type="radio" name="color" value="amber"/><span aria-label="Amber"></span></label>
+          <label class="swatch sky"><input type="radio" name="color" value="sky"/><span aria-label="Sky"></span></label>
+          <label class="swatch berry"><input type="radio" name="color" value="berry"/><span aria-label="Berry"></span></label>
+        </div></fieldset>
+        <button id="enter" class="primary" disabled>Loading the clearing…</button>
+        <div class="entry-note">No account needed <span>·</span> Microphone off</div>
+      </form>
+      <div class="independent">An independent community-world experiment.</div>
+    </div>
+  </main>
+  <div id="hud" hidden data-screen-label="02 In the clearing">
+    <div class="place"><span class="eyebrow">WELCOME TO</span><strong>The Woodland Lodge</strong><span id="room-label">Gather around the fire.</span></div>
+    <div id="speech" class="speech" role="status" hidden></div>
+    <div id="chat-panel" class="panel" hidden>
+      <div class="panel-title"><strong>At the lodge</strong><button id="close-chat" class="quiet" aria-label="Close chat">×</button></div>
+      <div id="messages" role="log" aria-live="polite"></div>
+      <form id="chat-form"><input id="chat-input" placeholder="Say hello…" maxlength="280" aria-label="Message the room" autocomplete="off"/><button type="submit" aria-label="Send message">↑</button></form>
+    </div>
+    <nav class="dock" aria-label="World actions">
+      <button id="wave" title="Wave (E)"><span>✦</span>Wave</button>
+      <button id="chat-toggle" aria-expanded="false" title="Room chat (Enter)"><span>☷</span>Chat</button>
+      <button id="voice" title="Join voice with your microphone off until you choose"><span>◉</span><span id="voice-label">Join voice</span></button>
+      <span class="dock-divider"></span><button id="invite" title="Copy a link to this room"><span>↗</span>Invite</button>
+    </nav>
+    <div class="move-help"><kbd>W A S D</kbd> move <span>·</span> drag to look <span>·</span> scroll to zoom</div>
+    <div id="joystick" aria-label="Touch movement joystick"><div id="stick"></div></div>
+    <div class="touch-hint">Drag here to look</div>
+    <button id="leave" class="leave quiet">Leave clearing</button>
+  </div>
+  <dialog id="help">
+    <div class="panel-title"><strong>Your little field guide</strong><button id="close-help" class="quiet" aria-label="Close field guide">×</button></div>
+    <p>Walk with <b>WASD</b> or the <b>arrow keys</b>. On a phone, use the thumbstick. Drag the world to rotate the camera; scroll to zoom. Press <b>E</b> to wave.</p>
+    <p><b>Voice is optional.</b> “Join voice” asks for microphone access. “Leave voice” stops capture. Voice is shared with others who join voice in your room. Peer connections may reveal network addresses to room participants.</p>
+    <p id="connection-guide"></p>
+    <details><summary>About this prototype & credits</summary><p>Inspired by the AI BEAVERS builder community. Independent experiment, not an official product or endorsement. No AI BEAVERS artwork is used.</p><p>Nature Kit by <a href="https://kenney.nl/assets/nature-kit" target="_blank" rel="noreferrer">Kenney</a> (CC0). Medieval tavern by <a href="https://kaylousberg.com/game-assets" target="_blank" rel="noreferrer">Kay Lousberg</a> (CC0). <a href="https://poly.pizza/m/fwtA7VLrXPr" target="_blank" rel="noreferrer">Beaver by Poly by Google</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a>; scaled, animated as a whole, with an original trail-color marker. Powered by PlayCanvas.</p><p>Prototype: ephemeral guest identities and messages, no accounts, no personal agents, no face video. Use a room only with people you trust.</p></details>
+  </dialog>
+  <div id="fatal" hidden role="alert"><h2>The clearing couldn’t load.</h2><p id="fatal-message"></p><button onclick="location.reload()">Try again</button></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
