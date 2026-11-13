@@ -7,25 +7,41 @@ import { randomUUID } from 'node:crypto';
 import { WebSocketServer, WebSocket } from 'ws';
 import { bucket, consume, validMessage } from './protocol.js';
 import { SPAWN, stepPosition } from '../shared/world.js';
+import { serverConfig } from './config.js';
 
 const root = resolve(fileURLToPath(new URL('../dist', import.meta.url)));
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.bin': 'application/octet-stream', '.png': 'image/png', '.svg': 'image/svg+xml' };
-const port = Number(process.env.PORT || 8788);
-const origins = (process.env.ALLOWED_ORIGINS || 'http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:8788,http://localhost:8788').split(',');
+const { port, host, origins, production } = serverConfig();
+const built = existsSync(resolve(root, 'index.html'));
+if (production && !built) throw new Error('Production requires a completed frontend build');
+let draining = false;
 export const server = http.createServer(async (req, res) => {
-  if (req.url === '/health') { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: true, service: 'beaververse', rooms: rooms.size })); return; }
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(self)');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('X-Frame-Options', 'DENY');
+  if (req.url === '/health') {
+    const ready = built && !draining;
+    res.writeHead(ready ? 200 : 503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    res.end(JSON.stringify({ ok: ready, service: 'beaververse' })); return;
+  }
+  if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405, { Allow: 'GET, HEAD' }); res.end(); return; }
   try {
     const path = decodeURIComponent(new URL(req.url, 'http://local').pathname);
     const filename = resolve(root, '.' + (path === '/' ? '/index.html' : path));
     if (!filename.startsWith(root + sep) || !(await stat(filename)).isFile()) throw new Error('missing');
-    res.writeHead(200, { 'Content-Type': types[extname(filename)] || 'application/octet-stream', 'X-Content-Type-Options': 'nosniff', 'Permissions-Policy': 'camera=(), microphone=(self)', 'Referrer-Policy': 'no-referrer' });
-    createReadStream(filename).pipe(res);
+    res.writeHead(200, { 'Content-Type': types[extname(filename)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
+    if (req.method === 'HEAD') { res.end(); return; }
+    const stream = createReadStream(filename);
+    stream.on('error', () => res.destroy());
+    res.on('close', () => stream.destroy());
+    stream.pipe(res);
   } catch { res.writeHead(404); res.end('Not found. Run npm run build first.'); }
 });
 const wss = new WebSocketServer({ noServer: true, maxPayload: 16384 });
 const rooms = new Map();
 server.on('upgrade', (req, socket, head) => {
-  if (req.url !== '/room' || !origins.includes(req.headers.origin) || wss.clients.size >= 96) { socket.write('HTTP/1.1 403 Forbidden\r\n\r\n'); socket.destroy(); return; }
+  if (draining || req.url !== '/room' || !origins.includes(req.headers.origin) || wss.clients.size >= 96) { socket.write('HTTP/1.1 403 Forbidden\r\n\r\n'); socket.destroy(); return; }
   wss.handleUpgrade(req, socket, head, ws => wss.emit('connection', ws));
 });
 const send = (ws, data) => { if (ws.readyState === WebSocket.OPEN && ws.bufferedAmount < 65536) ws.send(JSON.stringify(data)); };
@@ -86,4 +102,21 @@ wss.on('connection', ws => {
 });
 const snapshots = setInterval(() => { for (const [name, room] of rooms) broadcast(name, { type: 'state', players: [...room.values()].map(publicPlayer) }); }, 100);
 server.on('close', () => clearInterval(snapshots));
-server.listen(port, process.env.HOST || '127.0.0.1', () => console.log(`Beaververse server http://${process.env.HOST || '127.0.0.1'}:${server.address().port} · static build ${existsSync(root) ? 'present' : 'not yet built'}`));
+export function shutdown() {
+  if (draining) return;
+  draining = true;
+  clearInterval(snapshots);
+  for (const ws of wss.clients) ws.close(1012, 'Server restarting');
+  const deadline = setTimeout(() => {
+    for (const ws of wss.clients) ws.terminate();
+    server.closeAllConnections();
+  }, 5000);
+  deadline.unref();
+  let httpClosed = false, socketsClosed = false;
+  const finished = () => { if (httpClosed && socketsClosed) clearTimeout(deadline); };
+  wss.close(() => { socketsClosed = true; finished(); });
+  server.close(() => { httpClosed = true; finished(); });
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
+server.listen(port, host, () => console.log(`Beaververse server http://${host}:${server.address().port} · static build ${built ? 'present' : 'not yet built'}`));

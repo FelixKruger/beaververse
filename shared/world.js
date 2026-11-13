@@ -1,11 +1,14 @@
 // Collision truth is shared by server and client. World coordinates are metres.
 export const WORLD_RADIUS = 16;
-export const SPAWN = { x: 0, z: 6 };
+export const SPAWN = { x: 0, z: 10.5 };
 export const SOLIDS = [
-  { x: 0, z: -8.4, w: 7.8, d: 6.8 },
+  { x: -0.01, z: -8.56, w: 5.5, d: 4.8 },
   { x: -3.5, z: 0.8, w: 2.1, d: 0.65 },
   { x: 3.5, z: 0.8, w: 2.1, d: 0.65 },
   { x: 10.2, z: -5.8, w: 4.0, d: 3.8 },
+  { x: -4.7, z: -4, w: 2.2, d: 0.9 },
+  { x: 11.4, z: -1.5, w: 2.2, d: 0.9 },
+  { x: 13.5, z: -8.8, w: 1.8, d: 1.8 },
 ];
 export function heightAt(x, z) {
   if (x >= 5 && x <= 13 && z >= -8 && z <= 0) return 3.2;

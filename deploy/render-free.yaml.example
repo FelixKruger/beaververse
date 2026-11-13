@@ -1,0 +1,25 @@
+# Limited beta only. Review account access, terms and billing before use.
+# Free compute does not guarantee zero overage charges on a billable workspace.
+# No service is created by this file; initial Blueprint creation DOES deploy.
+# This is separate from the paid example and outside Render's default filename.
+services:
+  - type: web
+    name: beaververse-beta
+    runtime: node
+    plan: free
+    numInstances: 1
+    autoDeployTrigger: off
+    buildCommand: npm ci --include=dev --ignore-scripts && npm test && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: VITE_SAME_ORIGIN_SERVER
+        value: 'true'
+      - key: ALLOWED_ORIGINS
+        sync: false

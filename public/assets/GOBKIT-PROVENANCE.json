@@ -1,0 +1,83 @@
+{
+  "checked": "2026-11-13",
+  "source": "https://gobkit.com/api/free",
+  "license": "CC0 1.0 (public domain) — free for any use, commercial or personal, no attribution required.",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "selected": "Beaver",
+  "models": [
+    {
+      "id": "beaver",
+      "name": "Beaver",
+      "format": "glb",
+      "url": "https://gobkit.com/freebies/animal008/Beaver.glb",
+      "rigged": true,
+      "lowPoly": true,
+      "fps": 24,
+      "animations": [
+        {
+          "name": "idle",
+          "from": 0,
+          "to": 29,
+          "loop": true
+        },
+        {
+          "name": "attack",
+          "from": 30,
+          "to": 59,
+          "loop": true
+        },
+        {
+          "name": "dead",
+          "from": 60,
+          "to": 89,
+          "loop": false
+        },
+        {
+          "name": "walk",
+          "from": 90,
+          "to": 119,
+          "loop": true
+        }
+      ],
+      "license": "CC0 1.0 (public domain) — free for any use, commercial or personal, no attribution required.",
+      "sha256": "72fed180b8a909ee24bc17751ac427a7de76e232a997f1cc8bd5ba1870d9b986"
+    },
+    {
+      "id": "chubbybeaver",
+      "name": "ChubbyBeaver",
+      "format": "glb",
+      "url": "https://gobkit.com/freebies/animal011/ChubbyBeaver.glb",
+      "rigged": true,
+      "lowPoly": true,
+      "fps": 24,
+      "animations": [
+        {
+          "name": "idle",
+          "from": 0,
+          "to": 29,
+          "loop": true
+        },
+        {
+          "name": "attack",
+          "from": 30,
+          "to": 59,
+          "loop": true
+        },
+        {
+          "name": "dead",
+          "from": 60,
+          "to": 89,
+          "loop": false
+        },
+        {
+          "name": "walk",
+          "from": 90,
+          "to": 119,
+          "loop": true
+        }
+      ],
+      "license": "CC0 1.0 (public domain) — free for any use, commercial or personal, no attribution required.",
+      "sha256": "64a22627e06b0b20b72fcdfc98827f90e833b22a2e70c3206f306533006ff6a3"
+    }
+  ]
+}

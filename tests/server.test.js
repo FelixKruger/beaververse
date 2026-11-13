@@ -6,7 +6,7 @@ import { WebSocket } from 'ws';
 const pause = ms => new Promise(r => setTimeout(r, ms));
 async function until(fn) { for (let i = 0; i < 80; i++) { const value = fn(); if (value) return value; await pause(25); } throw new Error('Expected server event did not arrive'); }
 test('real server isolates rooms, limits payloads and requires voice consent', async t => {
-  const child = spawn(process.execPath, ['server/index.js'], { env: { ...process.env, PORT: '0', ALLOWED_ORIGINS: 'http://beaververse.test' }, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(process.execPath, ['server/index.js'], { env: { ...process.env, NODE_ENV: 'test', HOST: '127.0.0.1', PORT: '0', ALLOWED_ORIGINS: 'http://beaververse.test' }, stdio: ['ignore', 'pipe', 'pipe'] });
   let endpoint, log = '';
   child.stdout.on('data', data => { log += data; const match = log.match(/http:\/\/127\.0\.0\.1:(\d+)/); if (match) endpoint = `ws://127.0.0.1:${match[1]}/room`; });
   const clients = [];

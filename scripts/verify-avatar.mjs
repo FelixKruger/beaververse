@@ -1,0 +1,77 @@
+import { chromium } from '@playwright/test';
+import assert from 'node:assert/strict';
+import { mkdir, writeFile } from 'node:fs/promises';
+
+const output = 'artifacts/2026-11-13-avatar';
+await mkdir(output, { recursive: true });
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const errors = [], receipt = { checks: [], errors };
+const read = p => p.evaluate(() => window.__beaververse.snapshot());
+const self = s => s.players.find(p => p.id === s.id);
+async function join(name, options = {}) {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, ...options });
+  const p = await context.newPage();
+  p.on('pageerror', error => errors.push(error.message));
+  p.on('response', r => { if (r.status() >= 400 && /assets\//.test(r.url())) errors.push(`${r.status()} ${r.url()}`); });
+  await p.goto(process.env.TEST_URL || 'http://127.0.0.1:8788');
+  await p.waitForFunction(() => window.__beaververse);
+  await p.locator('#name').fill(name); await p.locator('#enter').click();
+  await p.waitForFunction(() => window.__beaververse.snapshot().connected);
+  return p;
+}
+try {
+  const a = await join('Willow'), b = await join('Fern');
+  const initial = await read(a), id = initial.id;
+  assert.equal(initial.avatarAsset, 'beaver-gobkit.glb');
+  assert.equal(self(initial).animation.clip, 'idle');
+  const beforeIdle = self(await read(a)).animation;
+  await a.waitForTimeout(250);
+  assert.notEqual(self(await read(a)).animation.time, beforeIdle.time);
+  receipt.checks.push('Gobkit asset loaded; idle timeline advances');
+  await a.locator('#world').focus(); await a.keyboard.down('KeyD');
+  await a.waitForTimeout(350); const walking1 = await read(a);
+  await a.waitForTimeout(230); const walking2 = await read(a), peer = await read(b);
+  assert.equal(self(walking2).animation.clip, 'walk');
+  assert.notDeepEqual(self(walking1).animation.paw, self(walking2).animation.paw, 'skin joint moves during walk');
+  assert.ok(Math.hypot(walking2.position.x - initial.position.x, walking2.position.z - initial.position.z) > 1);
+  assert.equal(peer.players.find(p => p.id === id).animation.clip, 'walk');
+  assert.equal(self(peer).animation.clip, 'idle', 'independent skeleton/controller');
+  await a.keyboard.up('KeyD'); await a.waitForTimeout(450);
+  assert.equal(self(await read(a)).animation.clip, 'idle');
+  receipt.checks.push('walk deforms joint and moves player; peer sees walk; other avatar stays idle; stopping restores idle');
+  await a.keyboard.press('KeyE'); await a.waitForTimeout(320);
+  const wave = await read(a), peerWave = await read(b);
+  assert.ok(self(wave).animation.greeting);
+  assert.ok(peerWave.players.find(p => p.id === id).animation.greeting);
+  assert.notDeepEqual(self(wave).animation.tail, beforeIdle.tail, 'greeting changes the paddle rotation');
+  assert.equal(self(peerWave).animation.greeting, false);
+  await a.screenshot({ path: `${output}/greeting-desktop.png` });
+  await a.waitForTimeout(1750);
+  assert.equal(self(await read(a)).animation.greeting, false);
+  receipt.checks.push('E waves sender paddle, replicates to peer, and returns to idle');
+  await a.screenshot({ path: `${output}/world-desktop.png` });
+  await a.mouse.move(720, 500); await a.mouse.wheel(0, -900); await a.waitForTimeout(500);
+  await a.screenshot({ path: `${output}/avatar-side.png` });
+  await a.mouse.move(800, 500); await a.mouse.down(); await a.mouse.move(280, 500, { steps: 30 }); await a.mouse.up(); await a.waitForTimeout(500);
+  await a.screenshot({ path: `${output}/avatar-front.png` });
+  await a.keyboard.press('KeyE'); await a.waitForTimeout(400);
+  await a.screenshot({ path: `${output}/avatar-front-wave.png` });
+  receipt.desktop = await read(a);
+  const mobile = await join('River', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+  await mobile.waitForTimeout(300); const resting = self(await read(mobile)).animation;
+  await mobile.waitForTimeout(250);
+  assert.equal(self(await read(mobile)).animation.time, resting.time, 'reduced-motion idle pauses');
+  await mobile.locator('#wave').click(); await mobile.waitForTimeout(320);
+  assert.ok(self(await read(mobile)).animation.greeting);
+  await mobile.waitForTimeout(1750);
+  assert.equal(self(await read(mobile)).animation.greeting, false);
+  assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  await mobile.screenshot({ path: `${output}/world-mobile.png` });
+  receipt.checks.push('reduced-motion idle pauses; touch greeting recovers; mobile layout fits');
+  receipt.mobile = await read(mobile);
+  await b.context().close();
+  await a.waitForFunction(() => window.__beaververse.snapshot().players.length === 2);
+  receipt.checks.push('leaving disposes remote avatar');
+  assert.deepEqual(errors, []); receipt.result = 'PASS';
+} catch (error) { receipt.result = 'FAIL'; receipt.failure = error.stack; throw error; }
+finally { await writeFile(`${output}/avatar-verification.json`, JSON.stringify(receipt, null, 2)); await browser.close(); console.log(JSON.stringify(receipt, null, 2)); }
