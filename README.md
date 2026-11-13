@@ -8,7 +8,7 @@ A small, playable woodland gathering place for builders. Walk as a beaver, meet 
 
 ## Make something playful
 
-Fork the repository and build a small addition: a woodland detail, clearer phone controls, an accessible interaction, or a better greeting. See [CONTRIBUTING.md](CONTRIBUTING.md) for the code map, checks and asset rules. Code is already MIT; third-party models retain their own licenses. No hosting account or paid service is needed to contribute locally.
+Fork the repository and build a small addition: a woodland detail, clearer phone controls, an accessible interaction, or a better greeting. See [CONTRIBUTING.md](CONTRIBUTING.md) for the code map, checks and asset rules. Current project code is AGPL-3.0-only; third-party models retain their own licenses. No hosting account or paid service is needed to contribute locally.
 
 ## Run locally
 
@@ -56,4 +56,4 @@ Browser checks require Chrome and a running local server. They use **fake microp
 
 No real agents, accounts, tool execution, personal mailboxes, camera/video, purchases or paid generation are connected. Room text is inert data. Current room names are not private access controls. The server keeps ephemeral live state; it does not persist chat.
 
-PlayCanvas + TypeScript/Vite, WebGL2 baseline. Source code MIT; third-party assets retain their listed licenses.
+PlayCanvas + TypeScript/Vite, WebGL2 baseline. Current original project code is licensed under [GNU AGPL version 3 only](LICENSE); see [scope, earlier MIT releases and dependency notices](LICENSING.md). Third-party assets retain their listed licenses. This change does not revoke the MIT permissions on earlier copies through commit `0bf5604`.

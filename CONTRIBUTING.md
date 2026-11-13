@@ -30,7 +30,9 @@ The existing main-branch workflow publishes GitHub Pages. A source PR is not per
 
 ## Rights and privacy
 
-The existing MIT license covers original project code. Contributions to that code are under the same license; this does not relicense third-party assets. Preserve attribution and license notices.
+Current original project code is GNU AGPL version 3 only (`AGPL-3.0-only`). Contributions to that code are under the same license unless explicitly agreed otherwise; this does not relicense third-party assets or dependencies. Contribute only material you have the right to license. Preserve attribution and license notices. Earlier MIT-licensed copies remain available under their original terms; see [LICENSING.md](LICENSING.md).
+
+If you run a modified version for network users, provide the prominent corresponding-source offer required by AGPL section 13. Update the field guide's source link to your actual fork/release and include the source and build instructions for the version you run; an unchanged upstream link is not sufficient for private modifications. Distribution has additional AGPL obligations: read the full license.
 
 For every new model, texture, sound or font, include the creator, original source, exact license, redistribution permission and modifications in `ASSET-LICENSES.md`. Verify rights to redistribute the actual source file, not just to use a rendered result. Do not submit ripped, unlicensed, trial-only or uncertain-rights assets. Generated assets need verified output and redistribution rights too.
 
