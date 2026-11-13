@@ -1,0 +1,23 @@
+# Review and approve provider, budget, region and public audience before use.
+# This file does not deploy anything. Initial Blueprint creation DOES deploy.
+services:
+  - type: web
+    name: beaververse
+    runtime: node
+    plan: 0.5c-512mb
+    numInstances: 1
+    autoDeployTrigger: off
+    buildCommand: npm ci --include=dev --ignore-scripts && npm test && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: VITE_SAME_ORIGIN_SERVER
+        value: 'true'
+      - key: ALLOWED_ORIGINS
+        sync: false

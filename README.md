@@ -4,14 +4,20 @@ A small, playable woodland gathering place for builders. Walk as a beaver, meet 
 
 **[Open the public solo preview](https://felixkruger.github.io/beaververse/)** · [Public repository](https://github.com/FelixKruger/beaververse) · [Verification and limitations](docs/VERIFICATION.md)
 
-**Early prototype.** The tree-lodge direction is established; the current licensed animal is a temporary stand-in while a custom hero avatar is prepared. This is an independent experiment inspired by the AI BEAVERS builder community, with no official affiliation or endorsement.
+**Early prototype, open for contributions.** This source iteration uses Gobkit's CC0 rigged Beaver with idle/walk animation and a paddle-tail greeting. It is a stylized quadruped interim avatar; the custom humanoid builder goal remains unfinished. The earlier model is preserved as a fallback. This is an independent experiment inspired by the AI BEAVERS builder community, with no official affiliation or endorsement. The public solo preview may show an earlier version; publishing this branch does not deploy it.
+
+## Make something playful
+
+Fork the repository and build a small addition: a woodland detail, clearer phone controls, an accessible interaction, or a better greeting. See [CONTRIBUTING.md](CONTRIBUTING.md) for the code map, checks and asset rules. Code is already MIT; third-party models retain their own licenses. No hosting account or paid service is needed to contribute locally.
 
 ## Run locally
 
-Node 22.12+ or 24+:
+Node 24 LTS is the tested baseline. To start from this published iteration:
 
 ```sh
-npm ci
+git clone --branch codex/community-source https://github.com/FelixKruger/beaververse.git
+cd beaververse
+npm ci --ignore-scripts
 npm run build
 npm start
 ```
@@ -21,6 +27,8 @@ Open **http://127.0.0.1:8788**. Use two independent browser windows/contexts to 
 WASD/arrows move, drag rotates the camera, scroll zooms, E waves. Phone browsers get a thumbstick. The timber ramp on the right climbs to the raised workshop. Names are temporary guest labels. Microphone is off until “Join voice”; “Leave voice” stops capture.
 
 ## Public preview versus multiplayer
+
+For the current deployment assessment, cost assumptions, prepared configuration and remaining launch gates, see [Hosted multiplayer readiness](docs/HOSTING-READINESS.md). The hosted service is not deployed yet. The client now retries temporary disconnections automatically; voice stays off after reconnecting.
 
 GitHub Pages hosts the static world in **clearly labeled solo preview mode**. It does not run this WebSocket server. Shared room/voice works with the included server, tested locally in independent Chrome contexts. Internet multiplayer requires a hosted TLS server. A public preview URL is not proof of internet multiplayer.
 
@@ -34,6 +42,7 @@ WebRTC uses Google's public STUN service and a six-person peer mesh; there is no
 npm test
 npm run build
 npm run test:browser
+node scripts/verify-avatar.mjs
 ```
 
 Browser checks require Chrome and a running local server. They use **fake microphone devices**, never the operator's microphone. Evidence and screenshots go into ignored `artifacts/`. Mobile viewport checks verify touch/layout, not physical-phone performance.
@@ -41,7 +50,7 @@ Browser checks require Chrome and a running local server. They use **fake microp
 ## Design and boundaries
 
 - [Product brief and budgets](docs/PRODUCT-BRIEF.md)
-- [Custom avatar production brief and Tripo dependency](docs/CUSTOM-AVATAR-BRIEF.md)
+- [Custom avatar goals and asset acceptance](docs/CUSTOM-AVATAR-BRIEF.md)
 - [Future agent contract and threat model](docs/AGENT-BOUNDARY.md)
 - [Asset credits and redistribution licenses](ASSET-LICENSES.md)
 

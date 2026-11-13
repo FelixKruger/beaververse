@@ -31,9 +31,9 @@ const room = new RoomConnection({
   },
   status: state => {
     element('connection').classList.toggle('live', state === 'online');
-    element('connection').textContent = state === 'online' ? `${count} ${count === 1 ? 'beaver' : 'beavers'} in the clearing` : state === 'connecting' ? 'Joining the clearing…' : state === 'solo' ? 'Solo preview' : 'Room disconnected · solo';
+    element('connection').textContent = state === 'online' ? `${count} ${count === 1 ? 'beaver' : 'beavers'} in the clearing` : state === 'connecting' ? 'Joining the clearing…' : state === 'reconnecting' ? 'Reconnecting to the clearing…' : state === 'solo' ? 'Solo preview' : 'Room disconnected · solo';
     element('connection-guide').textContent = state === 'online' ? `You’re connected to room “${roomName}”. An invite link brings friends to this room. Names are temporary guest labels, not verified identities.` : 'You can explore this preview solo. Shared chat and voice need the room server. This public preview is not connected to an internet multiplayer service.';
-    if (state === 'offline') { voice.leave(); setVoice(false); world.sync([]); if (entered) toast('Room connection lost. You can keep exploring solo. Reload to reconnect.'); }
+    if (state === 'offline') { voice.leave(); setVoice(false); world.sync([]); if (entered) toast('Room connection lost. Voice is off; you can keep exploring solo.'); }
   }
 });
 const voice = new VoiceCircle(room, toast);

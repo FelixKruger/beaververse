@@ -1,30 +1,25 @@
-# First playable verification · 2026-11-04
+# Verification and limits
 
-## Verified locally
-`npm run build` passed TypeScript checking and the Vite production build. `npm test` passed **8 tests**. `npm run test:browser` passed on the production build served by the included Node server.
+The 13 November 2026 source-publication checkout passed 27 unit/socket tests, the TypeScript/Vite production build, the full two-browser route regression, skeletal avatar checks and an actual server-restart/reconnect browser check. Environment: Node 24.11.1, Windows and Chrome 156.0.8078.81. Browser checks reported no page errors; the route check reported no failed assets. Dependency installation reported zero known vulnerabilities at that time.
 
-Environment: Windows, isolated headless **Chrome 156.0.8078.81**, **1440×900** desktop viewport; separate context at **390×844**, device scale 1 with touch/mobile emulation. No physical phone, real-user playtest, Safari or Firefox test was performed.
+## Reproduce
 
-- Fresh entry and all 12 model containers loaded; zero failed model/texture requests or serious console errors.
-- Two independent browser contexts saw each other's identities, walking, waves and text messages.
-- Malicious-looking message text stayed literal text; typing did not move an avatar.
-- Normal keyboard input climbed to the canopy deck at **y=3.2** and returned to ground. Shared movement tests cover 80/100/300ms packet-sized steps, solid edges and bench tunneling.
-- Microphone was off before opt-in. Two synthetic microphone devices established an actual WebRTC connection; receiving-side stats recorded incoming audio packets/bytes. This proves local media transport, not audible quality, real microphones, internet NAT traversal or TURN coverage.
-- Leaving voice stopped capture. Regression tests verified that delayed microphone permission cannot activate capture after disconnect/leave.
-- Closing a browser removed its presence. Touch input moved the avatar; the narrow viewport had no horizontal overflow.
-- Real WebSocket tests rejected malformed/hostile JSON, unknown schemas, excessive traffic, oversized frames, disallowed origins and cross-room signaling. Voice required both peers' consent. Independent review findings were fixed and rechecked.
+Use Node 24, npm ci --ignore-scripts, npm test and npm run build. Start npm start for the browser checks below. They require installed Chrome and use isolated contexts; synthetic voice tests use fake devices rather than the operator's microphone.
 
-## Performance observations and limits
-Final run snapshots: **60 fps / 71 draw calls** in the desktop context, **54 fps / 61 draw calls** in the mobile-emulated context. Other desktop runs ranged down to 36 fps under concurrent activity. These are snapshots on this host, **not device benchmarks or phone guarantees**. Submitted-primitive counting is unavailable in the release engine build; the visible-triangle target is not validated.
+Run npm run test:browser and node scripts/verify-avatar.mjs. TEST_URL can select another local test server; TEST_ARTIFACT_DIR can redirect full-route output. Reports and screenshots are written under ignored artifacts/ by default; inspect them before sharing.
 
-Whole production directory: **2,463,394 bytes** raw, **710,896 bytes** independently gzipped estimate across 29 files. This is a local estimate, not measured cold network load time. Vite warns that the main engine/application bundle is large (about 2.02 MB minified / 519 kB gzip); it remains within the initial download budget. No blanket performance claim.
+The node scripts/verify-reconnect.mjs check starts and stops its own server on loopback port 8791. Ensure that port is free. It verifies that two browsers recover from a server restart, movement synchronizes again and microphone capture remains off.
 
-## Publication boundaries
-Public repository: [FelixKruger/beaververse](https://github.com/FelixKruger/beaververse), verified readable without authentication with `private: false`. [Live preview](https://felixkruger.github.io/beaververse/) rendered in fresh desktop and mobile-emulated contexts. All **24 asset responses** passed status/body checks, with zero console errors. The served JavaScript SHA-256 matched the local production build. Solo movement worked; voice remained unavailable without a room connection and did not capture.
+## Covered behavior
 
-GitHub Pages is a static **solo preview**. It does not run the Node room server. Internet multiplayer needs a separately deployed TLS service and exact allowed origins. STUN is configured; TURN is not. The guest-room server is a prototype, not a production moderation/account system.
+- Asset loading and pinned beaver hash, rig, embedded atlas and named clips.
+- Independent idle/walk controllers, paddle-tail greeting, reduced-motion idle and departure cleanup.
+- Keyboard/touch arrival-to-workshop-and-return, shared movement, chat/waves and text rendering guards.
+- Microphone defaults off; leave/disconnect stops capture. Synthetic WebRTC transport works locally.
+- Exact protocol schemas, size/rate limits, room isolation, production configuration and graceful shutdown.
 
-Future personal-agent messages/world commands are documentation only. Face video remains future scope. The current licensed beaver is a temporary unrigged stand-in; bespoke avatar/animation and richer art are unfinished. Generated references are local and are not proof of runtime quality.
+## What this does not prove
 
-## Reproducible evidence
-Local scripts write ignored `artifacts/browser-verification.json`, `entry-desktop.png`, `two-player-desktop.png`, `canopy-deck.png`, `entry-mobile.png` and `world-mobile.png`. These contain synthetic visitor names. Run the included browser verifier against a running local server. It always uses fake microphone devices.
+Chrome desktop and mobile viewport emulation are not real-phone, Safari, Firefox or internet/NAT evidence. Synthetic microphone packets do not establish audible quality or TURN coverage. No hosted load test, independent security audit or production launch is claimed. The large PlayCanvas bundle warning remains; measure actual target-device performance.
+
+The avatar is a quadruped approximation, not the intended custom humanoid builder. Gait cadence is approximate and does not use foot-lock IK. The public solo preview may show an earlier version than the contribution branch.
