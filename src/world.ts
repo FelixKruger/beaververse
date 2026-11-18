@@ -208,7 +208,7 @@ export class Clearing {
       stash(this.model('sketchfab/workbench.glb', x, y, z, 1.65, 90));
     }
     // Warm lights on a hanging cable lead the eye toward the raised workshop.
-    stash(this.model('wheelbarrow.gltf', -7, .01, -5, 3, 0));
+    stash(this.model('wheelbarrow.gltf', -2.5, .01, -3.6, 3, 0));
     for (let i = 0; i <= 12; i++) {
       const t = i / 12, x = -4.5 + t * 15, y = 5.3 - Math.sin(t * Math.PI) * 1.45, z = -2.6 - t * .8;
       stash(this.primitive('Hanging lantern', 'sphere', x, y, z, .16, .22, .16, gold));
@@ -248,7 +248,7 @@ export class Clearing {
       stash(this.model('sketchfab/grass-clump.glb', x, .01, z, .45 + random() * .3, random() * 360));
       if (i % 3 === 0) stash(this.model('sketchfab/bush.glb', x + .5, .01, z, .65 + random() * .25, random() * 360));
     }
-    for (const [x, z, scale] of [[-3.1, 10, .9], [3.3, 12, 1], [-4.6, 2.6, .65], [-8, -.4, .9], [-2.8, -3.3, .5], [3, -2.7, .5]]) {
+    for (const [x, z, scale] of [[-3.1, 10, .9], [3.3, 12, .45], [-4.6, 2.6, .65], [-8, -.4, .9], [-3.8, -5.4, .5], [3, -2.7, .5]]) {
       stash(this.model('sketchfab/bush.glb', x, 0, z, scale, x * 61));
       stash(this.model('sketchfab/grass-clump.glb', x + .65, 0, z + .6, .5, z * 73));
     }
