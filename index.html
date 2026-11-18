@@ -23,6 +23,7 @@
       <form id="entry-form">
         <label for="name">What should we call you?</label>
         <input id="name" name="name" maxlength="24" placeholder="Your beaver name" required autocomplete="nickname" />
+        <label class="profile-choice"><input id="remember-profile" type="checkbox" />Remember my name on this device</label>
         <fieldset><legend>Your trail color</legend><div class="swatches">
           <label class="swatch moss"><input type="radio" name="color" value="moss" checked/><span aria-label="Moss"></span></label>
           <label class="swatch amber"><input type="radio" name="color" value="amber"/><span aria-label="Amber"></span></label>
@@ -31,6 +32,7 @@
         </div></fieldset>
         <button id="enter" class="primary" disabled>Loading the clearing…</button>
         <div class="entry-note">No account needed <span>·</span> Microphone off</div>
+        <p class="entry-note">No conversation recording. Optional visit notes stay on this device.</p>
       </form>
       <div class="independent">An independent community-world experiment.</div>
     </div>
@@ -49,18 +51,63 @@
       <button id="voice" title="Join voice with your microphone off until you choose"><span>◉</span><span id="voice-label">Join voice</span></button>
       <span class="dock-divider"></span><button id="invite" title="Copy a link to this room"><span>↗</span>Invite</button>
     </nav>
-    <div class="move-help"><kbd>W A S D</kbd> move <span>·</span> drag to look <span>·</span> scroll to zoom</div>
+    <div class="move-help"><kbd>W A S D</kbd> move <span>·</span> <kbd>Left Shift</kbd> run <span>·</span> drag to look <span>·</span> scroll to zoom</div>
     <div id="joystick" aria-label="Touch movement joystick"><div id="stick"></div></div>
     <div class="touch-hint">Drag here to look</div>
     <button id="leave" class="leave quiet">Leave clearing</button>
+    <button id="community-button" class="community-button">Your visit</button>
+    <button id="garden-button" class="garden-button">Garden · explore</button>
   </div>
+  <dialog id="community" aria-labelledby="community-title">
+    <div class="panel-title"><strong id="community-title">Make a little difference</strong><button id="close-community" class="quiet" aria-label="Back to the clearing">×</button></div>
+    <nav class="community-tabs" aria-label="Visit tools"><button data-community-tab="notes" aria-pressed="true">Your visit</button><button data-community-tab="garden" aria-pressed="false">Garden</button><button data-community-tab="agent" aria-pressed="false">Companion</button></nav>
+    <p id="community-status" role="status"></p>
+    <section data-community-panel="notes">
+        <aside id="return-thread" class="return-thread" hidden aria-labelledby="return-title">
+          <h2 id="return-title">Pick up your thread</h2>
+          <p id="return-date" class="muted-note"></p>
+          <p id="return-takeaway"></p>
+          <button id="continue-takeaway" type="button">Continue this thought</button>
+          <p class="muted-note">Your last takeaway, kept only in this browser. Continue it privately, or leave it here and explore.</p>
+        </aside>
+      <h2>Was this visit valuable?</h2>
+      <div class="community-actions"><button id="skip-visit" hidden>Leave without saving</button></div>
+      <p>Keep a takeaway or leave an idea for this world. Both are optional. No conversation or movement history is recorded here.</p>
+      <form id="note-form">
+        <div class="choices"><label><input type="radio" name="valuable" value="yes"/>Yes</label><label><input type="radio" name="valuable" value="no"/>No</label><label><input type="radio" name="valuable" value="skip" checked/>Skip</label></div>
+        <label class="field-label" for="takeaway">Something to take home · just for you</label><textarea id="takeaway" maxlength="1500" placeholder="An idea, a tool, or something you learned…"></textarea>
+        <label class="field-label" for="world-suggestion">An idea to improve the world · optional</label><textarea id="world-suggestion" maxlength="1500" placeholder="What would make your next visit better?"></textarea>
+        <label class="check-line"><input id="donate-feedback" type="checkbox"/>Include my answer and world suggestion when I choose “Export feedback”. My personal takeaway stays separate.</label>
+        <p class="muted-note">Saved in this browser, not encrypted. Anyone with access to this browser/device may read it. Nothing is uploaded or sent to AI. Exports go only where you choose to share them.</p>
+        <button id="note-save" class="primary" type="submit">Save on this device</button>
+      </form>
+      <p id="note-count" class="muted-note"></p>
+      <div class="community-actions"><button id="export-personal">Export my takeaways</button><button id="export-feedback">Export feedback</button><button id="delete-notes">Delete saved notes</button></div>
+    </section>
+    <section data-community-panel="garden" hidden>
+      <h2>A small garden, made together</h2><p>Look for eight numbered timber plots beside the stream, left of the arrival path. Add a planter or lantern, then close this panel to explore.</p>
+      <p id="garden-state" role="status">Connect to the room to see available plots and contribute.</p>
+      <form id="garden-form"><label class="field-label" for="creation-kind">What will you add?</label><select id="creation-kind"><option value="planter">A leafy timber planter</option><option value="lantern">A warm garden lantern</option></select><label class="field-label" for="creation-plot">Garden plot</label><select id="creation-plot" aria-describedby="garden-state"><option value="0">1</option><option value="1">2</option><option value="2">3</option><option value="3">4</option><option value="4">5</option><option value="5">6</option><option value="6">7</option><option value="7">8</option></select><div class="community-actions"><button id="place-creation" type="submit" disabled>Place my creation</button><button id="remove-creation" type="button" disabled>Remove my creation</button></div></form>
+      <p class="muted-note">One creation per visitor. Shared with this room for this visit; it disappears when you leave. You can only replace or remove your own creation.</p>
+    </section>
+    <section data-community-panel="agent" hidden>
+      <h2>Bring a companion</h2><p>Your agent can see public names and positions in this room and wave. It cannot read room conversations, use your microphone, access your computer or change the whole world.</p>
+      <label class="check-line"><input id="agent-move" type="checkbox"/>Allow movement</label><label class="check-line"><input id="agent-propose" type="checkbox"/>Allow garden proposals · I review each one</label>
+      <p class="muted-note">One agent per visitor. A new invitation replaces old access. Pair within one minute; access lasts 15 minutes and ends when you leave or revoke it. These choices apply when you create an invitation.</p>
+      <div class="community-actions"><button id="create-invite">Create agent invitation</button><button id="copy-invite" disabled>Copy invitation</button><button id="revoke-agent">Revoke access</button></div>
+      <label class="field-label" for="agent-instruction">Invitation for your trusted agent</label><textarea id="agent-instruction" readonly hidden></textarea>
+      <p id="agent-state" role="status">No companion connected.</p>
+      <p class="muted-note">Local preview: the agent must be able to reach this computer's local server. Sharing an invitation does not make localhost public.</p>
+      <div id="agent-proposal" hidden><p id="proposal-text"></p><div class="community-actions"><button id="accept-proposal">Accept in my plot</button><button id="decline-proposal">Decline</button></div></div>
+    </section>
+  </dialog>
   <dialog id="help">
     <div class="panel-title"><strong>Your little field guide</strong><button id="close-help" class="quiet" aria-label="Close field guide">×</button></div>
-    <p>Walk with <b>WASD</b> or the <b>arrow keys</b>. On a phone, use the thumbstick. Drag the world to rotate the camera; scroll to zoom. Press <b>E</b> to wave.</p>
+    <p>Walk with <b>WASD</b> or the <b>arrow keys</b>. Hold <b>Left Shift</b> to run; release it to walk. On a phone, use the thumbstick. Drag the world to rotate the camera; scroll to zoom. Press <b>E</b> to wave.</p>
     <p><b>Voice is optional.</b> “Join voice” asks for microphone access. “Leave voice” stops capture. Voice is shared with others who join voice in your room. Peer connections may reveal network addresses to room participants.</p>
     <p id="connection-guide"></p>
-    <p><a href="https://github.com/FelixKruger/beaververse/tree/codex/community-source" target="_blank" rel="noreferrer">Get this world's source code</a> &middot; <a href="./AGPL-3.0.txt" target="_blank" rel="noreferrer">AGPL-3.0</a> &middot; <a href="./THIRD-PARTY-NOTICES.txt" target="_blank" rel="noreferrer">Third-party code notices</a></p>
-    <details><summary>About this prototype & credits</summary><p>Inspired by the AI BEAVERS builder community. Independent experiment, not an official product or endorsement. No AI BEAVERS artwork is used.</p><p>Nature Kit by <a href="https://kenney.nl/assets/nature-kit" target="_blank" rel="noreferrer">Kenney</a> (CC0). Medieval tavern by <a href="https://kaylousberg.com/game-assets" target="_blank" rel="noreferrer">Kay Lousberg</a> (CC0). Animated Beaver by <a href="https://gobkit.com/freebies" target="_blank" rel="noreferrer">Gobkit</a> (<a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noreferrer">CC0</a>), with original paddle-tail greeting and trail scarf. Earlier fallback: <a href="https://poly.pizza/m/fwtA7VLrXPr" target="_blank" rel="noreferrer">Beaver by Poly by Google</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a>; scaled, animated as a whole, with an original trail-color marker. Powered by PlayCanvas.</p><p>Prototype: ephemeral guest identities and messages, no accounts, no personal agents, no face video. Use a room only with people you trust.</p></details>
+    <p><a href="https://github.com/FelixKruger/beaververse/tree/codex/playable-world-update" target="_blank" rel="noreferrer">Get this world’s source code</a> &middot; <a href="./AGPL-3.0.txt" target="_blank" rel="noreferrer">AGPL-3.0</a> &middot; <a href="./THIRD-PARTY-NOTICES.txt" target="_blank" rel="noreferrer">Third-party code notices</a></p>
+    <details><summary>About this prototype & credits</summary><p>Inspired by the AI BEAVERS builder community. Independent experiment, not an official product or endorsement. No AI BEAVERS artwork is used.</p><p>Nature Kit by <a href="https://kenney.nl/assets/nature-kit" target="_blank" rel="noreferrer">Kenney</a> (CC0). Medieval tavern by <a href="https://kaylousberg.com/game-assets" target="_blank" rel="noreferrer">Kay Lousberg</a> (CC0). Animated Beaver by <a href="https://gobkit.com/freebies" target="_blank" rel="noreferrer">Gobkit</a> (<a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noreferrer">CC0</a>), with original paddle-tail greeting and trail scarf. Earlier fallback: <a href="https://poly.pizza/m/fwtA7VLrXPr" target="_blank" rel="noreferrer">Beaver by Poly by Google</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a>; scaled, animated as a whole, with an original trail-color marker. Handpainted Tree Pack by <a href="https://sketchfab.com/3d-models/handpainted-tree-pack-d246b8b4439d44c6adc854ebc5ffc5ba" target="_blank" rel="noreferrer">rudolfs</a> and Wooden Workbench by <a href="https://sketchfab.com/3d-models/wooden-workbench-adc9528008e948d482bc552621628e11" target="_blank" rel="noreferrer">Mohammadhossein Deldar</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>); converted, scaled and textures prepared for this scene. <a href="./assets/sketchfab/ATTRIBUTION.md" target="_blank" rel="noreferrer">Full modification notes</a>. Powered by PlayCanvas.</p><p>Prototype: ephemeral guest identities and messages, no accounts or face video. Optional companions have limited, revocable permissions. Use a room only with people you trust.</p></details>
   </dialog>
   <div id="fatal" hidden role="alert"><h2>The clearing couldn’t load.</h2><p id="fatal-message"></p><button onclick="location.reload()">Try again</button></div>
   <script type="module" src="/src/main.ts"></script>

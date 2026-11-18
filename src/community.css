@@ -1,0 +1,28 @@
+.community-button{position:absolute;right:32px;top:116px;background:var(--surface);font-size:12px}
+.garden-button{position:absolute;right:32px;top:168px;background:var(--surface);font-size:12px;min-height:44px}
+.garden-plot-label{position:absolute;left:0;top:0;padding:3px 7px;background:var(--surface);color:var(--accent);border:1px solid var(--line);border-radius:4px;font-size:11px;pointer-events:none}
+#garden-state{border-left:2px solid var(--accent);padding-left:12px}
+#community{max-width:560px;width:calc(100% - 24px);max-height:88dvh}
+.community-tabs{display:flex;gap:6px;margin:16px 0;border-bottom:1px solid var(--line);padding-bottom:12px}
+.community-tabs button{flex:1;padding:8px;font-size:12px}
+.community-tabs [aria-pressed=true]{background:var(--accent);color:var(--ink);border-color:var(--accent)}
+#community h2{font:400 24px var(--font-display);margin:16px 0 8px}
+#community p{font-size:12px;line-height:1.6;margin:10px 0}
+#community .field-label{display:block;margin:16px 0 8px;font-size:12px;color:var(--text)}
+#community textarea,#community select{width:100%;font:inherit;line-height:1.5;background:#11251d;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:10px;min-height:44px}
+#community textarea{resize:vertical;min-height:76px}
+#community textarea:focus-visible,#community select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#community .choices{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0}
+#community .choices label,.check-line{display:flex;align-items:center;gap:8px;font-size:12px;min-height:44px}
+#community input[type=checkbox],#community input[type=radio],#remember-profile{min-height:20px;width:20px;height:20px;margin:0;accent-color:var(--accent);flex:none}
+#community .check-line{align-items:flex-start;line-height:1.5;padding:10px 0}
+.community-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.community-actions button{font-size:12px;flex:1;min-width:130px}
+#community .muted-note{color:var(--muted);font-size:11px}
+#agent-proposal{border-left:3px solid var(--accent);padding-left:12px;margin-top:16px}
+.profile-choice{display:flex!important;align-items:center;gap:8px;margin-top:12px;font-size:11px!important}
+@media(max-width:640px){.community-button{right:16px;top:76px;padding:8px 12px}#community{padding:16px}.community-actions button{min-width:110px}}
+@media(max-width:640px){.garden-button{right:16px;top:128px;padding:8px 12px}}
+/* A private remembered thread, shown only after the visitor opens their notes. */
+.return-thread { border: 1px solid #8c9d70; border-radius: 14px; padding: 14px; margin-bottom: 20px; background: #26392b; }
+#return-takeaway { white-space: pre-wrap; overflow-wrap: anywhere; }

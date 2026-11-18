@@ -1,0 +1,86 @@
+{
+  "sourceUrl": "https://sketchfab.com/3d-models/handpainted-tree-pack-d246b8b4439d44c6adc854ebc5ffc5ba",
+  "creator": "rudolfs",
+  "license": "CC BY 4.0",
+  "sourceIntegrity": "unchanged",
+  "assets": [
+    {
+      "file": "bush.glb",
+      "sourceObject": "bush",
+      "triangles": 96,
+      "texture": "vegetation_decal.png",
+      "textureSize": 512,
+      "blenderDimensions": [
+        2.045607566833496,
+        2.045607566833496,
+        1.218727707862854
+      ],
+      "bytes": 246392,
+      "sha256": "d822533dddc098d3db1dd62d9e96858e4b04c67542f3ce9e2833160504dc990d"
+    },
+    {
+      "file": "grass-clump.glb",
+      "sourceObject": "grass_short_1",
+      "triangles": 6,
+      "texture": "vegetation_decal.png",
+      "textureSize": 512,
+      "blenderDimensions": [
+        1.4778637886047363,
+        1.2798676490783691,
+        0.5976346731185913
+      ],
+      "bytes": 243840,
+      "sha256": "e81ce7832fd245b26e0e17d4e1878557c9e903c7a52f325f3aac1d6f2dc4603c"
+    },
+    {
+      "file": "spruce.glb",
+      "sourceObject": "spruce_3",
+      "triangles": 290,
+      "texture": "spruce_dif.png",
+      "textureSize": 1024,
+      "blenderDimensions": [
+        3.119089365005493,
+        3.1190876960754395,
+        5.16807746887207
+      ],
+      "bytes": 702864,
+      "sha256": "b3f89f1a417c9b017293da0d5e4973cce012e3b1e3216876cface4e6341240e7"
+    },
+    {
+      "file": "oak-large.glb",
+      "sourceObject": "oak_green_2",
+      "triangles": 1710,
+      "texture": "oak_dif.png",
+      "textureSize": 1024,
+      "blenderDimensions": [
+        5.722670555114746,
+        5.826728343963623,
+        6.944845676422119
+      ],
+      "bytes": 825464,
+      "sha256": "abbc97e010d53552db34390be755969a3d7fb841323a88ea5b43691453b05f62"
+    },
+    {
+      "file": "grass.png",
+      "kind": "diffuse texture",
+      "size": [
+        512,
+        512
+      ],
+      "bytes": 243481,
+      "sha256": "6e2ee119c282f5496f847a8184ed197759a449a446cd6e141e4b63ee87f0261b"
+    },
+    {
+      "file": "dirt.png",
+      "kind": "diffuse texture",
+      "size": [
+        512,
+        512
+      ],
+      "bytes": 264322,
+      "sha256": "4f0d4eae6f2f543027ee6938cf6316c587c79229874ca10e83fabdc35d823b04"
+    }
+  ],
+  "preparedAt": "2026-11-17",
+  "notice": "Selected and transformed from the licensed source. Preserve ATTRIBUTION.md. No endorsement implied."
+}

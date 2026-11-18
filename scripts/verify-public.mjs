@@ -1,12 +1,13 @@
 import { chromium } from '@playwright/test';
 import assert from 'node:assert/strict';
-import { writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 
 const url = process.argv[2] || 'https://felixkruger.github.io/beaververse/';
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const evidence = { url, browser: browser.version(), checkedAt: new Date().toISOString(), assets: [], errors: [] };
 const pending = [];
+await mkdir('artifacts', { recursive: true });
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
@@ -25,7 +26,7 @@ try {
   await page.keyboard.down('KeyD'); await page.waitForTimeout(450); await page.keyboard.up('KeyD');
   const after = await page.evaluate(() => window.__beaververse.snapshot());
   assert.ok(Math.hypot(after.position.x - before.position.x, after.position.z - before.position.z) > 1);
-  assert.equal(after.connected, false); assert.equal(after.loadedAssets, 12);
+  assert.equal(after.connected, false); assert.ok(after.loadedAssets >= 16, 'runtime scenery and ground maps loaded');
   await page.screenshot({ path: 'artifacts/public-world-desktop.png' });
   await page.locator('#voice').click();
   assert.equal((await page.evaluate(() => window.__beaververse.voiceStats())).capturing, false);
