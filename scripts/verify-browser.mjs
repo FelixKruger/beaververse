@@ -6,6 +6,10 @@ import { SPAWN } from '../shared/world.js';
 const url = process.env.TEST_URL || 'http://127.0.0.1:8788';
 const cameraAngle = -.35;
 const output = process.env.TEST_ARTIFACT_DIR || 'artifacts';
+// The private purchased-character preview uses a slower, stride-matched gait.
+const movementScale = Number(process.env.TEST_WALK_SPEED || 4.3) / 4.3;
+assert.ok(Number.isFinite(movementScale) && movementScale > 0, 'valid test movement speed');
+const routeTimeout = 12000 / Math.min(1, movementScale);
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
 const errors = [], failedAssets = [], evidence = { browser: browser.version(), url, platform: 'Windows; isolated headless desktop Chrome; mobile viewport is emulation only' };
@@ -23,7 +27,7 @@ async function page(options = {}) {
 async function enter(p, name) { await p.locator('#name').fill(name); await p.locator('#enter').click(); await waitFor(async () => (await snapshot(p)).connected, 'room join'); }
 async function hold(p, key, ms) { await p.locator('#world').focus(); await p.keyboard.down(key); await delay(ms); await p.keyboard.up(key); await delay(200); }
 async function walkTo(p, x, z) {
-  await p.locator('#world').focus(); const end = Date.now() + 12000;
+  await p.locator('#world').focus(); const end = Date.now() + routeTimeout;
   while (Date.now() < end) {
     const pos = (await snapshot(p)).position, dx = x - pos.x, dz = z - pos.z;
     if (Math.hypot(dx, dz) < .25) return;
@@ -41,7 +45,7 @@ async function touchTo(p, cdp, x, z) {
   const box = await p.locator('#joystick').boundingBox(), cx = box.x + box.width / 2, cy = box.y + box.height / 2;
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: cx, y: cy }] });
   try {
-    const end = Date.now() + 12000;
+    const end = Date.now() + routeTimeout;
     while (Date.now() < end) {
       const pos = (await snapshot(p)).position, dx = x - pos.x, dz = z - pos.z;
       if (Math.hypot(dx, dz) < .25) return;
@@ -58,7 +62,8 @@ try {
   await waitFor(async () => (await snapshot(a)).players.length === 2 && (await snapshot(b)).players.length === 2, 'independent context presence');
   for (const p of [a, b]) { const pos = (await snapshot(p)).position; assert.ok(Math.hypot(pos.x - SPAWN.x, pos.z - SPAWN.z) < .01, 'client/server agree on arrival'); }
   const initial = await snapshot(a); await hold(a, 'KeyD', 650); const moved = await snapshot(a);
-  assert.ok(Math.hypot(moved.position.x - initial.position.x, moved.position.z - initial.position.z) > 1, 'keyboard moves player');
+  if (process.env.EXPECTED_AVATAR_ASSET) assert.equal(initial.avatarAsset, process.env.EXPECTED_AVATAR_ASSET, 'requested character actually loaded');
+  assert.ok(Math.hypot(moved.position.x - initial.position.x, moved.position.z - initial.position.z) > movementScale, 'keyboard moves player at the configured gait speed');
   await waitFor(async () => { const other = (await snapshot(b)).players.find(p => p.id === moved.id); return other && Math.abs(other.x - moved.position.x) < .25; }, 'other session sees movement');
   await a.locator('#chat-toggle').click(); await a.locator('#chat-input').fill('<img src=x onerror=alert(1)> hello lodge'); await a.locator('#chat-form button').click();
   await waitFor(async () => (await b.locator('#messages').textContent()).includes('<img src=x onerror=alert(1)> hello lodge'), 'cross-context chat');
@@ -97,7 +102,7 @@ try {
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: j.x + 87, y: j.y + 56 }] });
   await delay(600); await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   const afterTouch = (await snapshot(mobile)).position;
-  assert.ok(Math.hypot(afterTouch.x - beforeTouch.x, afterTouch.z - beforeTouch.z) > .7, 'touch pointer moves player');
+  assert.ok(Math.hypot(afterTouch.x - beforeTouch.x, afterTouch.z - beforeTouch.z) > .7 * movementScale, 'touch pointer moves player at the configured gait speed');
   assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'no mobile horizontal overflow');
   await mobile.screenshot({ path: `${output}/world-mobile.png` }); evidence.mobileEmulation = await snapshot(mobile);
   for (const [x,z] of [[3,10.5],[6,10.5],[6,9.5]]) await touchTo(mobile,cdp,x,z);

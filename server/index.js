@@ -8,6 +8,8 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { bucket, consume, validMessage } from './protocol.js';
 import { SPAWN, stepPosition } from '../shared/world.js';
 import { serverConfig } from './config.js';
+import { Companions } from './companions.js';
+import { validCommunityMessage } from '../shared/contributions.js';
 
 const root = resolve(fileURLToPath(new URL('../dist', import.meta.url)));
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.bin': 'application/octet-stream', '.png': 'image/png', '.svg': 'image/svg+xml' };
@@ -20,6 +22,8 @@ export const server = http.createServer(async (req, res) => {
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(self)');
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('X-Frame-Options', 'DENY');
+  try { if (await companions.handle(req, res)) return; }
+  catch { if (!res.headersSent) res.writeHead(500, { 'Cache-Control': 'no-store' }); res.end(); return; }
   if (req.url === '/health') {
     const ready = built && !draining;
     res.writeHead(ready ? 200 : 503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
@@ -44,9 +48,11 @@ server.on('upgrade', (req, socket, head) => {
   if (draining || req.url !== '/room' || !origins.includes(req.headers.origin) || wss.clients.size >= 96) { socket.write('HTTP/1.1 403 Forbidden\r\n\r\n'); socket.destroy(); return; }
   wss.handleUpgrade(req, socket, head, ws => wss.emit('connection', ws));
 });
-const send = (ws, data) => { if (ws.readyState === WebSocket.OPEN && ws.bufferedAmount < 65536) ws.send(JSON.stringify(data)); };
+const send = (ws, data) => { if (ws?.readyState === WebSocket.OPEN && ws.bufferedAmount < 65536) ws.send(JSON.stringify(data)); };
 const broadcast = (room, data) => { for (const p of rooms.get(room)?.values() || []) send(p.ws, data); };
-const publicPlayer = p => ({ id: p.id, name: p.name, color: p.color, x: p.x, z: p.z, yaw: p.yaw, voice: p.voice, wave: p.wave });
+const publicPlayer = p => ({ id: p.id, name: p.name, color: p.color, x: p.x, z: p.z, yaw: p.yaw, voice: p.voice, wave: p.wave, agent: p.agent === true });
+const companions = new Companions({ rooms, send, publicPlayer, origins });
+server.requestTimeout = 10000;
 wss.on('connection', ws => {
   let player;
   let alive = true;
@@ -59,7 +65,7 @@ wss.on('connection', ws => {
     if (binary || !consume(traffic, now)) { ws.close(1008, 'Message limit'); return; }
     let m;
     try { m = JSON.parse(bytes.toString()); } catch { send(ws, { type: 'error', message: 'Invalid JSON' }); return; }
-    if (!validMessage(m)) { send(ws, { type: 'error', message: 'Invalid message' }); return; }
+    if (!validMessage(m) && !validCommunityMessage(m)) { send(ws, { type: 'error', message: 'Invalid message' }); return; }
     if (m.type === 'join') {
       if (player) { send(ws, { type: 'error', message: 'Already joined' }); return; }
       const room = rooms.get(m.room) || new Map();
@@ -71,6 +77,20 @@ wss.on('connection', ws => {
       return;
     }
     if (!player) { send(ws, { type: 'error', message: 'Join first' }); return; }
+    if (validCommunityMessage(m)) {
+      // Revoking authority must remain available when a social rate limit is exhausted.
+      if (m.type === 'agent-revoke') { companions.revoke(player); return; }
+      if (!consume(social, now)) { send(ws, { type: 'error', message: 'Please slow down', ...(m.type === 'agent-invite' ? { requestId: m.requestId } : {}) }); return; }
+      if (m.type === 'agent-invite') companions.invite(player, m.scopes, m.requestId);
+      if (m.type === 'creation-set') send(ws, { type: 'creation-result', ...companions.place(player, m.creation) });
+      if (m.type === 'creation-remove') { companions.creations.delete(player.id); send(ws, { type: 'creation-result', ok: true, message: 'Your garden plot is clear.' }); }
+      if (m.type === 'proposal-decide') {
+        const result = companions.decide(player, m.id, m.accept);
+        send(ws, { type: 'creation-result', ...result });
+        if (result.ok) send(ws, { type: 'agent-proposal', proposal: null });
+      }
+      return;
+    }
     if (m.type === 'move') {
       const limit = Math.min(0.3, (now - player.moved) / 1000) * 5.5;
       const dx = m.x - player.x, dz = m.z - player.z, length = Math.hypot(dx, dz);
@@ -95,12 +115,13 @@ wss.on('connection', ws => {
   ws.on('close', () => {
     clearInterval(heartbeat); clearTimeout(joinTimer);
     if (!player) return;
+    companions.leave(player);
     const room = rooms.get(player.room); room?.delete(player.id);
     broadcast(player.room, { type: 'notice', text: `${player.name} left the clearing.` });
     if (room?.size === 0) rooms.delete(player.room);
   });
 });
-const snapshots = setInterval(() => { for (const [name, room] of rooms) broadcast(name, { type: 'state', players: [...room.values()].map(publicPlayer) }); }, 100);
+const snapshots = setInterval(() => { companions.expire(); for (const [name, room] of rooms) broadcast(name, { type: 'state', players: [...room.values()].map(publicPlayer), creations: companions.list(name) }); }, 100);
 server.on('close', () => clearInterval(snapshots));
 export function shutdown() {
   if (draining) return;

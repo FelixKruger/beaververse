@@ -3,6 +3,10 @@ import './style.css';
 import { Clearing } from './world';
 import { RoomConnection, type Player } from './network';
 import { VoiceCircle } from './voice';
+import { community } from './community';
+import type { Creation } from './network';
+import { createWorkshop } from './workshop';
+import { heightAt } from '../shared/world.js';
 
 const element = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const toast = (text: string) => { element('speech').textContent = text; element('speech').hidden = false; clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { element('speech').hidden = true; }, 4500); };
@@ -19,10 +23,11 @@ const message = (name: string, text: string, notice = false) => {
   while (element('messages').childElementCount > 80) element('messages').firstElementChild?.remove();
   element('messages').scrollTop = element('messages').scrollHeight;
 };
-const sync = (players: Player[]) => { count = players.length; world.sync(players); voice.sync(players); element('connection').textContent = `${count} ${count === 1 ? 'beaver' : 'beavers'} in the clearing`; };
+const sync = (players: Player[], creations?: Creation[]) => { count = players.length; world.sync(players); if (creations) { world.syncCreations(creations); visit.syncGarden(creations); } voice.sync(players); element('connection').textContent = `${count} ${count === 1 ? 'beaver' : 'beavers'} in the clearing`; };
 const room = new RoomConnection({
   welcome: (id, players) => { world.identify(id); sync(players); }, state: sync,
   message: m => {
+    visit.message(m);
     if (m.type === 'chat') { message(m.name, m.text); if (element('chat-panel').hidden) toast(`${m.name}: ${m.text}`); }
     if (m.type === 'notice') message('', m.text, true);
     if (m.type === 'signal') void voice.signal(m.from, m.signal);
@@ -33,19 +38,39 @@ const room = new RoomConnection({
     element('connection').classList.toggle('live', state === 'online');
     element('connection').textContent = state === 'online' ? `${count} ${count === 1 ? 'beaver' : 'beavers'} in the clearing` : state === 'connecting' ? 'Joining the clearing…' : state === 'reconnecting' ? 'Reconnecting to the clearing…' : state === 'solo' ? 'Solo preview' : 'Room disconnected · solo';
     element('connection-guide').textContent = state === 'online' ? `You’re connected to room “${roomName}”. An invite link brings friends to this room. Names are temporary guest labels, not verified identities.` : 'You can explore this preview solo. Shared chat and voice need the room server. This public preview is not connected to an internet multiplayer service.';
-    if (state === 'offline') { voice.leave(); setVoice(false); world.sync([]); if (entered) toast('Room connection lost. Voice is off; you can keep exploring solo.'); }
+    if (state === 'offline') { voice.leave(); setVoice(false); world.sync([]); world.syncCreations([]); visit.disconnected(); if (entered) toast('Room connection lost. Voice is off; you can keep exploring solo.'); }
   }
 });
 const voice = new VoiceCircle(room, toast);
 const setVoice = (on: boolean) => { element('voice').classList.toggle('active', on); element('voice-label').textContent = on ? 'Leave voice' : 'Join voice'; element('voice').setAttribute('aria-pressed', String(on)); element('voice').title = on ? 'Stop microphone capture and leave voice' : 'Join room voice using your microphone'; };
 setVoice(false);
+const leave = () => { voice.leave(); room.close(); location.reload(); };
+const visit = community(room, toast, leave);
+const profileKey = 'beaververse.local-profile.v1';
+try {
+  const saved = JSON.parse(localStorage.getItem(profileKey) || 'null');
+  if (saved && typeof saved.name === 'string') { element<HTMLInputElement>('name').value = saved.name.slice(0, 24); element<HTMLInputElement>('remember-profile').checked = true; }
+} catch { /* Guests can enter with unavailable or invalid browser storage. */ }
 element('entry-form').addEventListener('submit', event => {
   event.preventDefault(); const name = element<HTMLInputElement>('name').value.trim().replace(/[\u0000-\u001f\u007f]/g, '').slice(0, 24); if (!name) return;
   const color = (document.querySelector('input[name="color"]:checked') as HTMLInputElement).value;
+  try { if (element<HTMLInputElement>('remember-profile').checked) localStorage.setItem(profileKey, JSON.stringify({ name })); else localStorage.removeItem(profileKey); } catch { toast('Your name could not be remembered on this device.'); }
   entered = true; world.enter(name, color); element('entry').hidden = true; element('hud').hidden = false; element('room-label').textContent = `Room: ${roomName} · Gather around the fire.`;
   room.connect(name, roomName, color); message('', 'Welcome. Walk to the fire, wave, or say hello.', true);
 });
 const toggleChat = (open: boolean) => { element('chat-panel').hidden = !open; element('chat-toggle').setAttribute('aria-expanded', String(open)); if (open) element('chat-input').focus(); else element('world').focus(); };
+const workshop = createWorkshop({
+  openChatDraft(text) {
+    const input = element<HTMLInputElement>('chat-input');
+    if (!input.value.trim()) input.value = text; else toast('Your existing chat draft is unchanged. Send or clear it before choosing another opener.');
+    toggleChat(true);
+  },
+  openTakeawayDraft(text) {
+    visit.open(); const input = element<HTMLTextAreaElement>('takeaway');
+    if (!input.value.trim()) input.value = text; else toast('Your existing takeaway draft is unchanged. Save or clear it before starting another.');
+    input.focus();
+  },
+});
 element('chat-toggle').onclick = () => toggleChat(element('chat-panel').hidden);
 element('close-chat').onclick = () => toggleChat(false);
 element('chat-form').onsubmit = e => { e.preventDefault(); const input = element<HTMLInputElement>('chat-input'); if (!input.value.trim()) return; if (!room.connected) { toast('Chat needs a connected room server.'); return; } room.send({ type: 'chat', text: input.value.trim() }); input.value = ''; };
@@ -59,17 +84,18 @@ element('voice').onclick = async () => {
 };
 element('invite').onclick = async () => { const url = new URL(location.href); url.searchParams.set('room', roomName); try { await navigator.clipboard.writeText(url.href); toast(room.connected ? 'Room link copied. Send it to a friend.' : 'Preview link copied. This is a solo preview.'); } catch { toast('Copy the address in your browser to invite someone.'); } };
 const help = element<HTMLDialogElement>('help'); element('help-button').onclick = () => help.showModal(); element('close-help').onclick = () => help.close();
-element('leave').onclick = () => { voice.leave(); room.close(); location.reload(); };
+element('leave').onclick = () => { voice.leave(); setVoice(false); visit.open(true); };
 window.addEventListener('pagehide', () => { voice.leave(); room.close(); });
 window.addEventListener('keydown', e => {
-  if (!entered || help.open) return;
+  if (!entered || document.querySelector('dialog[open]')) return;
   if (e.code === 'Escape') { toggleChat(false); return; }
-  if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName || '')) return;
+  if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(document.activeElement?.tagName || '')) return;
   if (e.code === 'Enter') { e.preventDefault(); toggleChat(true); }
   if (e.code === 'KeyE' && !e.repeat) element('wave').click();
 });
 try {
   world = new Clearing(element<HTMLCanvasElement>('world')); await world.load();
+  world.app.on('update', () => { if (entered) workshop.update({ ...world.position, y: heightAt(world.position.x, world.position.z) }); });
   element<HTMLButtonElement>('enter').disabled = false; element('enter').textContent = 'Enter the clearing  →'; element('connection').textContent = 'The clearing is ready';
   world.onMove = (x, z, yaw) => { const now = performance.now(); if (now - lastMove > 80 && room.connected) { room.send({ type: 'move', x, z, yaw }); lastMove = now; } };
   // Read-only diagnostics contain only this room's public runtime state, for reproducible verification.

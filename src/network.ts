@@ -1,5 +1,6 @@
-export type Player = { id: string; name: string; color: string; x: number; z: number; yaw: number; voice: boolean; wave: number };
-type Handlers = { welcome: (id: string, players: Player[]) => void; state: (players: Player[]) => void; message: (data: any) => void; status: (state: string) => void };
+export type Player = { id: string; name: string; color: string; x: number; z: number; yaw: number; voice: boolean; wave: number; agent?: boolean };
+export type Creation = { ownerId: string; ownerName: string; kind: 'planter' | 'lantern'; plot: number };
+type Handlers = { welcome: (id: string, players: Player[]) => void; state: (players: Player[], creations?: Creation[]) => void; message: (data: any) => void; status: (state: string) => void };
 
 export class RoomConnection {
   socket?: WebSocket;
@@ -30,7 +31,7 @@ export class RoomConnection {
         if (!current()) return;
         const m = JSON.parse(event.data);
         if (m.type === 'welcome') { window.clearTimeout(this.connectTimer); attempt = 0; this.connected = true; this.id = m.id; this.handlers.welcome(m.id, m.players); this.handlers.status('online'); }
-        else if (m.type === 'state') this.handlers.state(m.players);
+        else if (m.type === 'state') this.handlers.state(m.players, m.creations || []);
         else this.handlers.message(m);
       };
       socket.onclose = event => {

@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "scope": "Public prototype development roadmap; no automation, publication, deployment or paid service is authorized by this file.",
+  "items": [
+    {
+      "id": "guest-feedback-companion-garden",
+      "status": "complete",
+      "benefit": "Guests can keep takeaways, export voluntary suggestions, connect a scoped companion and make one shared garden contribution.",
+      "verification": [
+        "npm test",
+        "npm run build",
+        "node scripts/verify-community.mjs",
+        "node scripts/verify-browser.mjs against the chosen local server"
+      ]
+    },
+    {
+      "id": "companion-operational-hardening",
+      "status": "complete",
+      "benefit": "Pairing stays understandable and bounded under failed connections, stale invitations, slow requests and exhausted limits.",
+      "files": [
+        "server/companions.js",
+        "src/community.ts",
+        "tests/community.test.js",
+        "scripts/verify-community.mjs"
+      ],
+      "preconditions": "Preserve observe/wave default and no conversation access; do not widen the capability vocabulary.",
+      "verification": [
+        "real HTTP expiry/disconnect/race/rate tests",
+        "development proxy pairing",
+        "browser error/recovery path"
+      ]
+    },
+    {
+      "id": "welcoming-garden-discovery",
+      "status": "complete",
+      "benefit": "A first visitor can find the garden and understand which plots are free without reading a long explanation.",
+      "files": [
+        "src/world.ts",
+        "src/community.ts",
+        "src/community.css",
+        "index.html",
+        "scripts/verify-community.mjs"
+      ],
+      "preconditions": "Original small cues using current materials; no paid assets, engine changes or additional tracking. Preserve routes and current art direction.",
+      "verification": [
+        "desktop and 390x844 interaction",
+        "plot occupancy and ownership clarity",
+        "two-browser update",
+        "existing route checks"
+      ]
+    },
+    {
+      "id": "clearing-material-and-readability-polish",
+      "status": "complete",
+      "benefit": "Keep the cute houses and authored forest while improving the visible path, deck and character readability.",
+      "files": [
+        "src/world.ts",
+        "design/ART-DIRECTION.md",
+        "public/assets/sketchfab/"
+      ],
+      "preconditions": "One bounded art pass using existing licensed assets only: prioritize angular outer path/ground joins, repeated grass, dark garden/character and flat deck material. Preserve composition, collision route. No new downloads/accounts, paid assets in public, engine migration, publication or unrelated UI. Capture matched before/after views. Do not modify private rig/animation in this item.",
+      "verification": [
+        "npm test",
+        "npm run build",
+        "before/after desktop and phone captures with a clear visual decision",
+        "full keyboard/touch routes, workshop draft journey and no browser errors"
+      ]
+    },
+    {
+      "id": "participant-mute-and-report-design",
+      "status": "ready",
+      "benefit": "Visitors have an immediate local escape from unwanted text without an opaque bad-actor scoring system.",
+      "files": [
+        "src/main.ts",
+        "src/community.ts",
+        "src/voice.ts",
+        "index.html",
+        "tests",
+        "scripts"
+      ],
+      "preconditions": "Implement per-session personal text mute and a local report draft/export. No permanent bans, identity inference, remote reporting or silent capture. Explicitly distinguish text mute from voice behavior.",
+      "verification": [
+        "muting affects only the muting visitor",
+        "unmute restores future text",
+        "report exports only selected permitted evidence",
+        "no hidden audio claim"
+      ]
+    },
+    {
+      "id": "persistent-world-contract",
+      "status": "human-review",
+      "benefit": "Accepted creations survive return visits with clear ownership, deletion and restore semantics.",
+      "reason": "Choose durable identity/ownership and shared acceptance rules before migrating temporary guest contributions into persistent public content. Prepare a concrete design and local fixture; do not infer consent to persist existing sessions."
+    },
+    {
+      "id": "public-release-and-live-ai",
+      "status": "approval-required",
+      "benefit": "Members can join from different devices and networks with reliable hosting and optional live AI.",
+      "reason": "Explicit publication/provider/budget approval, admission/moderation, rights and data-processing choices required. Existing publication work remains separate."
+    }
+  ],
+  "note": "Public roadmap only. Private cycle history, leases, automation status and evidence are not included."
+}

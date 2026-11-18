@@ -18,7 +18,7 @@ for name in names:
 license_path = next(p for p in archive.namelist() if p.endswith('License.txt'))
 (root / 'KENNEY-LICENSE.txt').write_bytes(archive.read(license_path))
 
-base = 'https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/84fa4e91af6a88989be7c99e0891cede11f2ca38/'
+base = 'https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/main/'
 folder = 'addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/green/'
 for name in ['building_home_A_green.gltf', 'building_home_A_green.bin', 'building_home_B_green.gltf', 'building_home_B_green.bin', 'building_lumbermill_green.gltf', 'building_lumbermill_green.bin', 'hexagons_medieval.png']:
     (root / name).write_bytes(get(base + folder + name))

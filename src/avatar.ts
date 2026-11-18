@@ -2,6 +2,8 @@ import * as pc from 'playcanvas';
 
 export const BEAVER_ASSET = 'beaver-gobkit.glb';
 export const BEAVER_SCALE = .30;
+export const WALK_SPEED = 4.3;
+export const RUN_SPEED = 5.5;
 
 /** A separate skeleton and controller per visitor; shared animation tracks are immutable. */
 export class BeaverAnimation {
@@ -34,13 +36,13 @@ export class BeaverAnimation {
   }
 
   // Called after PlayCanvas evaluates the imported clips. No root motion or body hopping.
-  update(moving: boolean, waveAge: number, reduced: boolean) {
+  update(moving: boolean, waveAge: number, reduced: boolean, speed = 4.3) {
     const next = moving ? 'walk' : 'idle';
     if (next !== this.state) {
       this.layer.transition(next, .18);
       this.state = next;
     }
-    this.body.anim!.speed = moving ? 1.65 : reduced ? 0 : 1;
+    this.body.anim!.speed = moving ? 1.65 * pc.math.clamp(speed / 4.3, .1, 1.5) : reduced ? 0 : 1;
     this.greeting = waveAge >= 0 && waveAge < 1600;
     if (this.greeting) {
       const envelope = Math.min(1, waveAge / 180, (1600 - waveAge) / 220);
